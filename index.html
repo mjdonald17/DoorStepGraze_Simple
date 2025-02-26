@@ -3,51 +3,643 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DoorstepGraze.com</title>
+    <title>DoorstepGraze - Charcuterie Delivered & Mastered</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+        :root {
+            --primary-color: #BF6B63; /* Terracotta */
+            --secondary-color: #F8F4E3; /* Ivory */
+            --accent-color: #767E0F; /* Olive Green */
+            --highlight-color: #96B7C5; /* Soft Blue */
+            --text-color: #333333;
+            --light-color: #ffffff;
+            --dark-accent: #9A534C; /* Darker Terracotta for hover states */
+            --logo-bg-color: #B36B54; /* Logo background terracotta */
+        }
+        
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #333;
+            box-sizing: border-box;
         }
         
-        .container {
-            text-align: center;
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-        }
-        
-        h1 {
-            color: #2c8a56;
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        
-        p {
-            font-size: 1.2rem;
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
             line-height: 1.6;
         }
         
-        .highlight {
-            color: #2c8a56;
+        /* Header Styles */
+        header {
+            background-color: var(--light-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+        
+        .logo {
+            text-decoration: none;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-image {
+            height: 50px;
+            width: auto;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(248, 244, 227, 0.9), rgba(248, 244, 227, 0.9)), url('/api/placeholder/1600/900') no-repeat center center;
+            background-size: cover;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+        }
+        
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            opacity: 0.5;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin-top: 60px;
+        }
+        
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: #5D6416;
+            transform: translateY(-3px);
+        }
+        
+        /* How It Works Section */
+        .how-it-works {
+            background-color: var(--light-color);
+            padding: 80px 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 50px;
+        }
+        
+        .steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .step-box {
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            padding: 30px;
+            flex: 1 1 300px;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        
+        .step-box:hover {
+            transform: translateY(-10px);
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--highlight-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
             font-weight: bold;
+        }
+        
+        .step-box h3 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        
+        .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Features Section */
+        .features {
+            background-color: var(--secondary-color);
+            padding: 80px 20px;
+            position: relative;
+        }
+        
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(248, 244, 227, 0.8), rgba(248, 244, 227, 0.8)), url('/api/placeholder/1600/900') no-repeat center center;
+            background-size: cover;
+            z-index: 0;
+        }
+        
+        .feature-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-box {
+            background-color: var(--light-color);
+            border-radius: 10px;
+            padding: 30px;
+            flex: 1 1 300px;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            border-bottom: 4px solid var(--primary-color);
+        }
+        
+        .feature-box:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-box h3 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        /* Charcuterie Gallery */
+        .gallery {
+            padding: 80px 20px;
+            background-color: var(--light-color);
+        }
+        
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .gallery-item {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 250px;
+            background-color: #ddd;
+            position: relative;
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(191, 107, 99, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+        
+        .gallery-text {
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        /* Coming Soon Section */
+        .coming-soon {
+            background-color: var(--highlight-color);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .coming-soon h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .coming-soon p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .email-signup {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        .email-signup input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .email-signup button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .email-signup button:hover {
+            background-color: #5D6416;
+        }
+        
+        /* Testimonials Section */
+        .testimonials {
+            padding: 80px 20px;
+            background-color: var(--secondary-color);
+        }
+        
+        .testimonial-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .testimonial {
+            padding: 30px;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .testimonial-text::before {
+            content: '"';
+            font-size: 4rem;
+            font-family: Georgia, serif;
+            color: var(--primary-color);
+            opacity: 0.3;
+            position: absolute;
+            top: -30px;
+            left: -15px;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--text-color);
+            color: var(--light-color);
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .footer-logo-image {
+            height: 40px;
+            width: auto;
+            filter: brightness(1.2);
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            color: var(--light-color);
+            font-size: 1.5rem;
+            transition: color 0.3s;
+        }
+        
+        .social-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .feature-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .gallery-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .email-signup {
+                flex-direction: column;
+                border-radius: 10px;
+            }
+            
+            .email-signup input {
+                width: 100%;
+                border-radius: 10px 10px 0 0;
+            }
+            
+            .email-signup button {
+                width: 100%;
+                border-radius: 0 0 10px 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>DoorstepGraze.com</h1>
-        <p>Welcome to <span class="highlight">DoorstepGraze</span>, where fresh food meets convenience.</p>
-        <p>Our website is coming soon!</p>
-    </div>
+    <header>
+        <nav class="navbar">
+            <a href="#" class="logo">
+                <div class="logo-container">
+                    <img src="doorstepgraze_logo.jpg" alt="DoorstepGraze Logo" class="logo-image">
+                </div>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#features">What's Included</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#coming-soon">Join Us</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Charcuterie Delivered & Mastered</h1>
+            <p>Premium ingredients and expert guidance delivered to your door. Create stunning charcuterie boards that will impress your guests every time.</p>
+            <a href="#coming-soon" class="cta-button">Join the Waitlist</a>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <h2 class="section-title">How DoorstepGraze Works</h2>
+        <div class="steps-container">
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-icon">📦</div>
+                <h3>Select Your Box</h3>
+                <p>Choose from our curated charcuterie collections, designed for different occasions and group sizes.</p>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-icon">🚚</div>
+                <h3>Doorstep Delivery</h3>
+                <p>We carefully package and deliver premium meats, cheeses, and accompaniments right to your door.</p>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-icon">👩‍🍳</div>
+                <h3>Learn & Create</h3>
+                <p>Access our step-by-step tutorials to transform simple ingredients into an impressive charcuterie masterpiece.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2 class="section-title">What's In Your Box</h2>
+        <div class="feature-container">
+            <div class="feature-box">
+                <div class="feature-icon">🧀</div>
+                <h3>Artisanal Cheeses</h3>
+                <p>Curated selection of premium cheeses from around the world, with detailed tasting notes and pairing suggestions.</p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🥩</div>
+                <h3>Cured Meats</h3>
+                <p>Exceptional quality charcuterie meats, sliced and ready to arrange beautifully on your board.</p>
+            </div>
+            <div class="feature-box">
+                <div class="feature-icon">🍯</div>
+                <h3>Perfect Pairings</h3>
+                <p>Specialty crackers, nuts, dried fruits, honey, jams, and other accompaniments to complete your board.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+        <h2 class="section-title">Charcuterie Inspiration Gallery</h2>
+        <div class="gallery-container">
+            <div class="gallery-item">
+                <div class="gallery-overlay">
+                    <div class="gallery-text">
+                        <h3>Classic Board</h3>
+                        <p>The timeless arrangement of meats, cheeses and fruits</p>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <div class="gallery-overlay">
+                    <div class="gallery-text">
+                        <h3>Date Night Special</h3>
+                        <p>Intimate and romantic selection for two</p>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <div class="gallery-overlay">
+                    <div class="gallery-text">
+                        <h3>Party Platter</h3>
+                        <p>Designed to impress your guests at any gathering</p>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <div class="gallery-overlay">
+                    <div class="gallery-text">
+                        <h3>Seasonal Special</h3>
+                        <p>Featuring the freshest seasonal ingredients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <h2 class="section-title">What Our Early Testers Say</h2>
+        <div class="testimonial-container">
+            <div class="testimonial">
+                <div class="testimonial-text">
+                    I've always been intimidated by those beautiful charcuterie boards on social media. DoorstepGraze made it so easy to create something that looked professional on my first try!
+                </div>
+                <div class="testimonial-author">Sarah M., Mom of 3</div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-text">
+                    The quality of ingredients is exceptional, and the guided tutorial turned what could have been a stressful dinner party prep into a fun creative experience.
+                </div>
+                <div class="testimonial-author">Michelle L., Busy Professional</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="coming-soon" id="coming-soon">
+        <h2>Be First to Experience DoorstepGraze</h2>
+        <p>Join our waiting list to receive updates, early access, and special introductory offers when we launch!</p>
+        <form class="email-signup">
+            <input type="email" placeholder="Enter your email address" required>
+            <button type="submit">Join Waitlist</button>
+        </form>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <img src="doorstepgraze_logo.jpg" alt="DoorstepGraze Logo" class="footer-logo-image">
+            </div>
+            <div class="social-links">
+                <a href="#">📱</a>
+                <a href="#">📘</a>
+                <a href="#">📸</a>
+                <a href="#">🐦</a>
+            </div>
+            <p class="copyright">© 2025 DoorstepGraze. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
