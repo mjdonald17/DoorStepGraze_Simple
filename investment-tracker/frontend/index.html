@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Tracker</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>📊 Investment Tracker</h1>
+            <p class="subtitle">Track your portfolio with comprehensive stock analysis and news monitoring</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-button active" data-tab="portfolio">Portfolio</button>
+            <button class="tab-button" data-tab="stock-details">Stock Details</button>
+            <button class="tab-button" data-tab="news">News Feed</button>
+        </nav>
+
+        <!-- Portfolio Tab -->
+        <div id="portfolio-tab" class="tab-content active">
+            <div class="section">
+                <h2>My Portfolio</h2>
+
+                <!-- Add Stock Form -->
+                <div class="add-stock-form">
+                    <input type="text" id="stock-symbol" placeholder="Enter stock symbol (e.g., RKLB)" maxlength="10">
+                    <button id="add-stock-btn" class="btn-primary">Add Stock</button>
+                </div>
+
+                <!-- Portfolio List -->
+                <div id="portfolio-list" class="portfolio-grid">
+                    <p class="empty-state">No stocks in portfolio. Add your first stock above.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Details Tab -->
+        <div id="stock-details-tab" class="tab-content">
+            <div class="section">
+                <h2>Stock Analysis</h2>
+
+                <!-- Stock Selector -->
+                <div class="stock-selector">
+                    <select id="detail-stock-select">
+                        <option value="">Select a stock from your portfolio</option>
+                    </select>
+                    <button id="load-details-btn" class="btn-primary">Load Details</button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="details-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Loading stock data...</p>
+                </div>
+
+                <!-- Stock Details Container -->
+                <div id="stock-details-container"></div>
+            </div>
+        </div>
+
+        <!-- News Tab -->
+        <div id="news-tab" class="tab-content">
+            <div class="section">
+                <h2>News & Discussions</h2>
+
+                <!-- Stock Selector -->
+                <div class="stock-selector">
+                    <select id="news-stock-select">
+                        <option value="">Select a stock from your portfolio</option>
+                    </select>
+                    <button id="load-news-btn" class="btn-primary">Load News</button>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="news-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Loading news...</p>
+                </div>
+
+                <!-- News Container -->
+                <div id="news-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/app.js"></script>
+</body>
+</html>
