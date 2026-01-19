@@ -1,6 +1,7 @@
 import yfinance as yf
 import requests
 from datetime import datetime, timedelta
+import time
 
 ALPHA_VANTAGE_KEY = 'demo'  # Users should replace with their own key
 
@@ -8,9 +9,38 @@ def get_stock_report(symbol):
     """
     Generate comprehensive stock report with fundamental and technical data
     """
+    # Retry logic to handle rate limiting
+    max_retries = 3
+    retry_delay = 2  # seconds
+
+    for attempt in range(max_retries):
+        try:
+            stock = yf.Ticker(symbol)
+            info = stock.info
+
+            # Check if we got valid data
+            if not info or len(info) < 5:
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    raise Exception("Unable to fetch stock data. Please try again in a moment.")
+
+            break  # Success, exit retry loop
+
+        except Exception as e:
+            if "429" in str(e) or "Too Many Requests" in str(e):
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    raise Exception(f"Yahoo Finance is temporarily rate-limiting requests. Please wait a minute and try again.")
+            else:
+                raise e
+
     try:
-        stock = yf.Ticker(symbol)
-        info = stock.info
 
         # Basic Information
         report = {
@@ -124,7 +154,10 @@ def get_stock_report(symbol):
         return report
 
     except Exception as e:
-        raise Exception(f"Error fetching stock data: {str(e)}")
+        error_msg = str(e)
+        if "429" in error_msg or "Too Many Requests" in error_msg:
+            raise Exception("Yahoo Finance rate limit reached. Please wait 30-60 seconds and try again.")
+        raise Exception(f"Error fetching stock data: {error_msg}")
 
 
 def get_top_officers(info):
