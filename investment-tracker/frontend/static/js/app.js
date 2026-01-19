@@ -1,5 +1,6 @@
-// API Base URL
-const API_BASE = 'http://localhost:5000/api';
+// API Base URL - automatically uses the current host
+// This allows access from iPhone, iPad, or any device on your network
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
 // State management
 let currentPortfolio = [];
