@@ -151,6 +151,9 @@ def get_stock_report(symbol):
             "last_updated": datetime.now().isoformat()
         }
 
+        # Add small delay to avoid rate limiting on subsequent requests
+        time.sleep(1)
+
         return report
 
     except Exception as e:
@@ -176,6 +179,9 @@ def get_top_officers(info):
 def get_historical_performance(stock):
     """Calculate historical performance metrics"""
     try:
+        # Add delay before making another API call to avoid rate limiting
+        time.sleep(0.5)
+
         # Get historical data for different periods
         today = datetime.now()
         periods = {

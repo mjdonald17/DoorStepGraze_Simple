@@ -3,6 +3,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 import praw
 import os
+import time
 
 # NewsAPI configuration (users should get their own free key from https://newsapi.org)
 NEWS_API_KEY = 'demo'  # Replace with actual key
@@ -23,9 +24,15 @@ def get_stock_news(symbol):
     yahoo_news = get_yahoo_news(symbol)
     all_news.extend(yahoo_news)
 
+    # Add delay to avoid rate limiting
+    time.sleep(1)
+
     # 2. Get news from NewsAPI
     newsapi_news = get_newsapi_news(symbol)
     all_news.extend(newsapi_news)
+
+    # Add delay to avoid rate limiting
+    time.sleep(0.5)
 
     # 3. Get Reddit discussions (for engagement metrics)
     reddit_posts = get_reddit_discussions(symbol)
@@ -46,6 +53,9 @@ def get_yahoo_news(symbol):
     """Get news from Yahoo Finance via yfinance"""
     news_items = []
     try:
+        # Add small delay before API call
+        time.sleep(0.5)
+
         stock = yf.Ticker(symbol)
         news = stock.news
 
