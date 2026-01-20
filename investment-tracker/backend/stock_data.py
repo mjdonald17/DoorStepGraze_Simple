@@ -8,7 +8,7 @@ ALPHA_VANTAGE_KEY = 'demo'  # Users should replace with their own key
 # Simple cache to avoid re-fetching the same stock
 _stock_cache = {}
 _last_request_time = 0
-_MIN_REQUEST_INTERVAL = 3  # Minimum 3 seconds between requests
+_MIN_REQUEST_INTERVAL = 10  # Minimum 10 seconds between requests
 
 def get_stock_report(symbol):
     """
