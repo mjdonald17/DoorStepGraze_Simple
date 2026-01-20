@@ -1,18 +1,19 @@
-import yfinance as yf
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 
-ALPHA_VANTAGE_KEY = 'demo'  # Users should replace with their own key
+# Alpha Vantage API (free tier: 25 requests/day)
+# Get your free API key at: https://www.alphavantage.co/support/#api-key
+ALPHA_VANTAGE_KEY = 'demo'  # Replace with your free API key
 
 # Simple cache to avoid re-fetching the same stock
 _stock_cache = {}
 _last_request_time = 0
-_MIN_REQUEST_INTERVAL = 10  # Minimum 10 seconds between requests
+_MIN_REQUEST_INTERVAL = 2  # 2 seconds between requests
 
 def get_stock_report(symbol):
     """
-    Generate stock report with rate limiting protection
+    Generate stock report using Alpha Vantage API
     """
     global _last_request_time
 
@@ -28,86 +29,97 @@ def get_stock_report(symbol):
         time.sleep(wait_time)
 
     try:
-        stock = yf.Ticker(symbol)
-        info = stock.info
+        # Get company overview from Alpha Vantage
+        url = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={ALPHA_VANTAGE_KEY}"
+        response = requests.get(url, timeout=10)
         _last_request_time = time.time()
 
-        # Check if we got valid data
-        if not info or len(info) < 5:
-            raise Exception("Unable to fetch stock data. The stock symbol may be invalid, or Yahoo Finance is temporarily unavailable. Please wait 30 seconds and try again.")
+        data = response.json()
 
-        # Basic Information
+        # Check if we got valid data
+        if not data or 'Symbol' not in data:
+            if 'Note' in data:
+                raise Exception("API rate limit reached. Alpha Vantage free tier allows 25 requests/day and 5/minute. Please wait a minute or get a free API key at https://www.alphavantage.co/support/#api-key")
+            raise Exception(f"Unable to fetch data for {symbol}. The stock symbol may be invalid or Alpha Vantage is temporarily unavailable.")
+
+        # Get current quote
+        quote_url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey={ALPHA_VANTAGE_KEY}"
+        time.sleep(1)  # Small delay between requests
+        quote_response = requests.get(quote_url, timeout=10)
+        quote_data = quote_response.json().get('Global Quote', {})
+
+        # Build simplified report
         report = {
             "symbol": symbol,
-            "name": info.get('longName', 'N/A'),
-            "sector": info.get('sector', 'N/A'),
-            "industry": info.get('industry', 'N/A'),
-            "website": info.get('website', 'N/A'),
-            "description": info.get('longBusinessSummary', 'N/A'),
+            "name": data.get('Name', 'N/A'),
+            "sector": data.get('Sector', 'N/A'),
+            "industry": data.get('Industry', 'N/A'),
+            "website": 'N/A',
+            "description": data.get('Description', 'N/A'),
 
-            # Price Data - SIMPLIFIED
+            # Price Data
             "price": {
-                "current": info.get('currentPrice', info.get('regularMarketPrice', 'N/A')),
-                "previous_close": info.get('previousClose', 'N/A'),
-                "day_high": info.get('dayHigh', 'N/A'),
-                "day_low": info.get('dayLow', 'N/A'),
-                "52_week_high": info.get('fiftyTwoWeekHigh', 'N/A'),
-                "52_week_low": info.get('fiftyTwoWeekLow', 'N/A'),
+                "current": float(quote_data.get('05. price', 0)) if quote_data.get('05. price') else 'N/A',
+                "previous_close": float(quote_data.get('08. previous close', 0)) if quote_data.get('08. previous close') else 'N/A',
+                "day_high": float(quote_data.get('03. high', 0)) if quote_data.get('03. high') else 'N/A',
+                "day_low": float(quote_data.get('04. low', 0)) if quote_data.get('04. low') else 'N/A',
+                "52_week_high": float(data.get('52WeekHigh', 0)) if data.get('52WeekHigh') else 'N/A',
+                "52_week_low": float(data.get('52WeekLow', 0)) if data.get('52WeekLow') else 'N/A',
             },
 
-            # Valuation Metrics - KEY METRICS ONLY
+            # Valuation Metrics
             "valuation": {
-                "market_cap": info.get('marketCap', 'N/A'),
-                "pe_ratio": info.get('trailingPE', 'N/A'),
-                "forward_pe": info.get('forwardPE', 'N/A'),
-                "price_to_book": info.get('priceToBook', 'N/A'),
+                "market_cap": float(data.get('MarketCapitalization', 0)) if data.get('MarketCapitalization') else 'N/A',
+                "pe_ratio": float(data.get('PERatio', 0)) if data.get('PERatio') else 'N/A',
+                "forward_pe": float(data.get('ForwardPE', 0)) if data.get('ForwardPE') else 'N/A',
+                "price_to_book": float(data.get('PriceToBookRatio', 0)) if data.get('PriceToBookRatio') else 'N/A',
             },
 
-            # Financial Performance - CORE METRICS
+            # Financial Performance
             "financials": {
-                "revenue": info.get('totalRevenue', 'N/A'),
-                "revenue_growth": info.get('revenueGrowth', 'N/A'),
-                "profit_margin": info.get('profitMargins', 'N/A'),
-                "earnings_growth": info.get('earningsGrowth', 'N/A'),
+                "revenue": float(data.get('RevenueTTM', 0)) if data.get('RevenueTTM') else 'N/A',
+                "revenue_growth": float(data.get('QuarterlyRevenueGrowthYOY', 0)) if data.get('QuarterlyRevenueGrowthYOY') else 'N/A',
+                "profit_margin": float(data.get('ProfitMargin', 0)) if data.get('ProfitMargin') else 'N/A',
+                "earnings_growth": float(data.get('QuarterlyEarningsGrowthYOY', 0)) if data.get('QuarterlyEarningsGrowthYOY') else 'N/A',
             },
 
-            # Balance Sheet - KEY RATIOS
+            # Balance Sheet
             "balance_sheet": {
-                "total_cash": info.get('totalCash', 'N/A'),
-                "total_debt": info.get('totalDebt', 'N/A'),
-                "debt_to_equity": info.get('debtToEquity', 'N/A'),
+                "total_cash": 'N/A',
+                "total_debt": 'N/A',
+                "debt_to_equity": float(data.get('DebtToEquity', 0)) if data.get('DebtToEquity') else 'N/A',
             },
 
-            # Profitability - ESSENTIAL ONLY
+            # Profitability
             "profitability": {
-                "roe": info.get('returnOnEquity', 'N/A'),
-                "gross_margin": info.get('grossMargins', 'N/A'),
+                "roe": float(data.get('ReturnOnEquityTTM', 0)) if data.get('ReturnOnEquityTTM') else 'N/A',
+                "gross_margin": float(data.get('GrossProfitTTM', 0)) if data.get('GrossProfitTTM') else 'N/A',
             },
 
-            # Dividend Information - SIMPLIFIED
+            # Dividend Information
             "dividends": {
-                "dividend_yield": info.get('dividendYield', 'N/A'),
+                "dividend_yield": float(data.get('DividendYield', 0)) if data.get('DividendYield') else 'N/A',
             },
 
-            # Trading Information - BASICS
+            # Trading Information
             "trading": {
-                "volume": info.get('volume', 'N/A'),
-                "average_volume": info.get('averageVolume', 'N/A'),
-                "beta": info.get('beta', 'N/A'),
+                "volume": float(quote_data.get('06. volume', 0)) if quote_data.get('06. volume') else 'N/A',
+                "average_volume": 'N/A',
+                "beta": float(data.get('Beta', 0)) if data.get('Beta') else 'N/A',
             },
 
-            # Analyst Recommendations - KEY INFO
+            # Analyst Recommendations
             "analyst": {
-                "target_price": info.get('targetMeanPrice', 'N/A'),
-                "recommendation": info.get('recommendationKey', 'N/A'),
+                "target_price": float(data.get('AnalystTargetPrice', 0)) if data.get('AnalystTargetPrice') else 'N/A',
+                "recommendation": 'N/A',
             },
 
-            # Historical Performance - REMOVED (was causing extra API call)
+            # Historical Performance
             "performance": {
-                "1_month": info.get('52WeekChange', 'N/A'),  # Use data from info instead
+                "1_month": float(data.get('50DayMovingAverage', 0)) if data.get('50DayMovingAverage') else 'N/A',
                 "3_months": 'N/A',
                 "6_months": 'N/A',
-                "1_year": 'N/A',
+                "1_year": float(data.get('52WeekChange', 0)) if data.get('52WeekChange') else 'N/A',
                 "ytd": 'N/A'
             },
 
@@ -120,15 +132,11 @@ def get_stock_report(symbol):
 
         return report
 
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"Network error: Unable to connect to Alpha Vantage. Check your internet connection.")
     except Exception as e:
         error_msg = str(e)
-        if "429" in error_msg or "Too Many Requests" in error_msg:
-            raise Exception("Yahoo Finance rate limit reached. WAIT 60 SECONDS before trying again. If this keeps happening, restart the server and wait 2 minutes before making any requests.")
         raise Exception(f"Error: {error_msg}")
-
-
-# REMOVED: get_top_officers() and get_historical_performance()
-# to reduce API calls and avoid rate limiting
 
 
 def format_large_number(num):
