@@ -5,42 +5,36 @@ import time
 
 ALPHA_VANTAGE_KEY = 'demo'  # Users should replace with their own key
 
+# Simple cache to avoid re-fetching the same stock
+_stock_cache = {}
+_last_request_time = 0
+_MIN_REQUEST_INTERVAL = 3  # Minimum 3 seconds between requests
+
 def get_stock_report(symbol):
     """
-    Generate comprehensive stock report with fundamental and technical data
+    Generate stock report with rate limiting protection
     """
-    # Retry logic to handle rate limiting
-    max_retries = 3
-    retry_delay = 2  # seconds
+    global _last_request_time
 
-    for attempt in range(max_retries):
-        try:
-            stock = yf.Ticker(symbol)
-            info = stock.info
+    # Check cache first (valid for 5 minutes)
+    cache_key = f"{symbol}_{datetime.now().strftime('%Y%m%d%H%M')}"
+    if cache_key in _stock_cache:
+        return _stock_cache[cache_key]
 
-            # Check if we got valid data
-            if not info or len(info) < 5:
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                    continue
-                else:
-                    raise Exception("Unable to fetch stock data. Please try again in a moment.")
-
-            break  # Success, exit retry loop
-
-        except Exception as e:
-            if "429" in str(e) or "Too Many Requests" in str(e):
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
-                    retry_delay *= 2  # Exponential backoff
-                    continue
-                else:
-                    raise Exception(f"Yahoo Finance is temporarily rate-limiting requests. Please wait a minute and try again.")
-            else:
-                raise e
+    # Enforce minimum time between requests
+    time_since_last = time.time() - _last_request_time
+    if time_since_last < _MIN_REQUEST_INTERVAL:
+        wait_time = _MIN_REQUEST_INTERVAL - time_since_last
+        time.sleep(wait_time)
 
     try:
+        stock = yf.Ticker(symbol)
+        info = stock.info
+        _last_request_time = time.time()
+
+        # Check if we got valid data
+        if not info or len(info) < 5:
+            raise Exception("Unable to fetch stock data. The stock symbol may be invalid, or Yahoo Finance is temporarily unavailable. Please wait 30 seconds and try again.")
 
         # Basic Information
         report = {
@@ -121,13 +115,16 @@ def get_stock_report(symbol):
             "last_updated": datetime.now().isoformat()
         }
 
+        # Cache the result for 5 minutes
+        _stock_cache[cache_key] = report
+
         return report
 
     except Exception as e:
         error_msg = str(e)
         if "429" in error_msg or "Too Many Requests" in error_msg:
-            raise Exception("Yahoo Finance rate limit reached. Please wait 30-60 seconds and try again.")
-        raise Exception(f"Error fetching stock data: {error_msg}")
+            raise Exception("Yahoo Finance rate limit reached. WAIT 60 SECONDS before trying again. If this keeps happening, restart the server and wait 2 minutes before making any requests.")
+        raise Exception(f"Error: {error_msg}")
 
 
 # REMOVED: get_top_officers() and get_historical_performance()
