@@ -11,6 +11,16 @@ _stock_cache = {}
 _last_request_time = 0
 _MIN_REQUEST_INTERVAL = 2  # 2 seconds between requests
 
+def safe_float(value):
+    """Safely convert a value to float, return 'N/A' if not possible"""
+    if value is None or value == '' or value == 'None' or value == 'null':
+        return 'N/A'
+    try:
+        result = float(value)
+        return result if result != 0 else 'N/A'
+    except (ValueError, TypeError):
+        return 'N/A'
+
 def get_stock_report(symbol):
     """
     Generate stock report using Alpha Vantage API
@@ -59,67 +69,67 @@ def get_stock_report(symbol):
 
             # Price Data
             "price": {
-                "current": float(quote_data.get('05. price', 0)) if quote_data.get('05. price') else 'N/A',
-                "previous_close": float(quote_data.get('08. previous close', 0)) if quote_data.get('08. previous close') else 'N/A',
-                "day_high": float(quote_data.get('03. high', 0)) if quote_data.get('03. high') else 'N/A',
-                "day_low": float(quote_data.get('04. low', 0)) if quote_data.get('04. low') else 'N/A',
-                "52_week_high": float(data.get('52WeekHigh', 0)) if data.get('52WeekHigh') else 'N/A',
-                "52_week_low": float(data.get('52WeekLow', 0)) if data.get('52WeekLow') else 'N/A',
+                "current": safe_float(quote_data.get('05. price')),
+                "previous_close": safe_float(quote_data.get('08. previous close')),
+                "day_high": safe_float(quote_data.get('03. high')),
+                "day_low": safe_float(quote_data.get('04. low')),
+                "52_week_high": safe_float(data.get('52WeekHigh')),
+                "52_week_low": safe_float(data.get('52WeekLow')),
             },
 
             # Valuation Metrics
             "valuation": {
-                "market_cap": float(data.get('MarketCapitalization', 0)) if data.get('MarketCapitalization') else 'N/A',
-                "pe_ratio": float(data.get('PERatio', 0)) if data.get('PERatio') else 'N/A',
-                "forward_pe": float(data.get('ForwardPE', 0)) if data.get('ForwardPE') else 'N/A',
-                "price_to_book": float(data.get('PriceToBookRatio', 0)) if data.get('PriceToBookRatio') else 'N/A',
+                "market_cap": safe_float(data.get('MarketCapitalization')),
+                "pe_ratio": safe_float(data.get('PERatio')),
+                "forward_pe": safe_float(data.get('ForwardPE')),
+                "price_to_book": safe_float(data.get('PriceToBookRatio')),
             },
 
             # Financial Performance
             "financials": {
-                "revenue": float(data.get('RevenueTTM', 0)) if data.get('RevenueTTM') else 'N/A',
-                "revenue_growth": float(data.get('QuarterlyRevenueGrowthYOY', 0)) if data.get('QuarterlyRevenueGrowthYOY') else 'N/A',
-                "profit_margin": float(data.get('ProfitMargin', 0)) if data.get('ProfitMargin') else 'N/A',
-                "earnings_growth": float(data.get('QuarterlyEarningsGrowthYOY', 0)) if data.get('QuarterlyEarningsGrowthYOY') else 'N/A',
+                "revenue": safe_float(data.get('RevenueTTM')),
+                "revenue_growth": safe_float(data.get('QuarterlyRevenueGrowthYOY')),
+                "profit_margin": safe_float(data.get('ProfitMargin')),
+                "earnings_growth": safe_float(data.get('QuarterlyEarningsGrowthYOY')),
             },
 
             # Balance Sheet
             "balance_sheet": {
                 "total_cash": 'N/A',
                 "total_debt": 'N/A',
-                "debt_to_equity": float(data.get('DebtToEquity', 0)) if data.get('DebtToEquity') else 'N/A',
+                "debt_to_equity": safe_float(data.get('DebtToEquity')),
             },
 
             # Profitability
             "profitability": {
-                "roe": float(data.get('ReturnOnEquityTTM', 0)) if data.get('ReturnOnEquityTTM') else 'N/A',
-                "gross_margin": float(data.get('GrossProfitTTM', 0)) if data.get('GrossProfitTTM') else 'N/A',
+                "roe": safe_float(data.get('ReturnOnEquityTTM')),
+                "gross_margin": safe_float(data.get('GrossProfitTTM')),
             },
 
             # Dividend Information
             "dividends": {
-                "dividend_yield": float(data.get('DividendYield', 0)) if data.get('DividendYield') else 'N/A',
+                "dividend_yield": safe_float(data.get('DividendYield')),
             },
 
             # Trading Information
             "trading": {
-                "volume": float(quote_data.get('06. volume', 0)) if quote_data.get('06. volume') else 'N/A',
+                "volume": safe_float(quote_data.get('06. volume')),
                 "average_volume": 'N/A',
-                "beta": float(data.get('Beta', 0)) if data.get('Beta') else 'N/A',
+                "beta": safe_float(data.get('Beta')),
             },
 
             # Analyst Recommendations
             "analyst": {
-                "target_price": float(data.get('AnalystTargetPrice', 0)) if data.get('AnalystTargetPrice') else 'N/A',
+                "target_price": safe_float(data.get('AnalystTargetPrice')),
                 "recommendation": 'N/A',
             },
 
             # Historical Performance
             "performance": {
-                "1_month": float(data.get('50DayMovingAverage', 0)) if data.get('50DayMovingAverage') else 'N/A',
+                "1_month": safe_float(data.get('50DayMovingAverage')),
                 "3_months": 'N/A',
                 "6_months": 'N/A',
-                "1_year": float(data.get('52WeekChange', 0)) if data.get('52WeekChange') else 'N/A',
+                "1_year": safe_float(data.get('52WeekChange')),
                 "ytd": 'N/A'
             },
 
